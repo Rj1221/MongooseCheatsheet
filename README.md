@@ -3,7 +3,9 @@
 ## Introduction to Mongoose
 
 Mongoose is an Object Data Modeling (ODM) library for MongoDB and Node.js. It provides a straightforward and schema-based solution to model your application data and interact with MongoDB collections. This cheat sheet covers the essential concepts and commands for using Mongoose effectively.
+
 ![MongooseJs Logo](https://miro.medium.com/v2/resize:fit:1050/1*acfAKaDI7uv5GyFnJmiPhA.png)
+
 ## Table of Contents
 1. [Installation](#installation)
 2. [Connecting to MongoDB](#connecting-to-mongodb)
@@ -66,15 +68,32 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   age: { type: Number },
+  profileImage: { type: Buffer }, // For storing image data in the database
 });
 
 const User = mongoose.model('User', userSchema);
 ```
 
 ## Creating a Model
-
 ```javascript
-const User = mongoose.model('User', userSchema);
+const express = require('express');
+const multer = require('multer');
+const upload = multer(); // Middleware for handling multipart/form-data (file uploads)
+
+const app = express();
+
+app.post('/users', upload.single('profileImage'), async (req, res) => {
+  const { name, email, age } = req.body;
+  const profileImage = req.file ? req.file.buffer : undefined; // Get the image data from the request
+
+  try {
+    const newUser = new User({ name, email, age, profileImage });
+    await newUser.save();
+    res.send(newUser);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 ```
 
 ## CRUD Operations
@@ -82,28 +101,78 @@ const User = mongoose.model('User', userSchema);
 ### Create
 
 ```javascript
-const newUser = new User({ name: 'John Doe', email: 'john@example.com', age: 30 });
-newUser.save();
+const express = require('express');
+const multer = require('multer');
+const upload = multer(); // Middleware for handling multipart/form-data (file uploads)
+
+const app = express();
+
+app.post('/users', upload.single('profileImage'), async (req, res) => {
+  const { name, email, age } = req.body;
+  const profileImage = req.file ? req.file.buffer : undefined; // Get the image data from the request
+
+  try {
+    const newUser = new User({ name, email, age, profileImage });
+    await newUser.save();
+    res.send(newUser);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 ```
 
 ### Read
 
 ```javascript
-const allUsers = await User.find();
-const userById = await User.findById(userId);
-const usersWithAgeGreaterThan25 = await User.find({ age: { $gt: 25 } });
+app.get('/users', async (req, res) => {
+  try {
+    const allUsers = await User.find();
+    res.send(allUsers);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
+
+app.get('/users/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await User.findById(userId);
+    res.send(user);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 ```
 
 ### Update
 
 ```javascript
-await User.updateOne({ _id: userId }, { age: 32 });
+app.patch('/users/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { age } = req.body;
+
+  try {
+    await User.updateOne({ _id: userId }, { age });
+    res.send('User updated successfully.');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 ```
 
 ### Delete
 
 ```javascript
-await User.deleteOne({ _id: userId });
+app.delete('/users/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    await User.deleteOne({ _id: userId });
+    res.send('User deleted successfully.');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 ```
 
 ## Querying with Mongoose
@@ -151,29 +220,11 @@ const totalUsers = await User.countDocuments();
 
 ## Middleware
 
-### Document Middleware
+Middleware in Mongoose can be used for various purposes, such as image processing before saving an image to the database. For simplicity, we will use middleware for logging.
 
 ```javascript
 userSchema.pre('save', function (next) {
-  // Do something before saving the document
-  next();
-});
-```
-
-### Query Middleware
-
-```javascript
-userSchema.pre('find', function (next) {
-  // Do something before executing the query
-  next();
-});
-```
-
-### Aggregate Middleware
-
-```javascript
-userSchema.pre('aggregate', function (next) {
-  // Do something before executing the aggregation pipeline
+  console.log('About to save a user.');
   next();
 });
 ```
@@ -264,7 +315,9 @@ try {
 
 ```javascript
 const usersWithTotalPosts = await User.aggregate([
-  { $lookup: { from: 'posts', localField: 'posts', foreignField: '_id', as: 'totalPosts' } },
+  { $lookup: { from: 'posts', localField
+
+: 'posts', foreignField: '_id', as: 'totalPosts' } },
   { $project: { name: 1, totalPosts: { $size: '$totalPosts' } } },
 ]);
 ```
@@ -295,7 +348,8 @@ Set
 ```bash
 DEBUG=mongoose:* node your-app.js
 ```
-# Conclusion:
+
+# Conclusion
 
 In conclusion, this Mongoose cheat sheet serves as a valuable reference guide for efficiently working with MongoDB in Node.js applications. Covering key concepts such as schema definition, model creation, CRUD operations, querying, middleware, validation, population, and more, it equips developers of all levels with the knowledge to build robust and scalable applications with ease. Happy coding with Mongoose and MongoDB!
 
