@@ -4,7 +4,7 @@
 
 Mongoose is an Object Data Modeling (ODM) library for MongoDB and Node.js. It provides a straightforward and schema-based solution to model your application data and interact with MongoDB collections. This cheat sheet covers the essential concepts and commands for using Mongoose effectively.
 
-![MongooseJs Logo](https://miro.medium.com/v2/resize:fit:1050/1*acfAKaDI7uv5GyFnJmiPhA.png)
+<img src="https://miro.medium.com/v2/resize:fit:1050/1*acfAKaDI7uv5GyFnJmiPhA.png" alt="Mongoose Image" width="300px"/>
 
 ## Table of Contents
 1. [Installation](#installation)
